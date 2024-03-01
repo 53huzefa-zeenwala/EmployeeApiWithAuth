@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="Content/css" rel="stylesheet">
+
+</head>
+<body class="p-3 bg-light">
+    <div class="d-flex justify-content-between align-items-center">
+        <button class="btn btn-success" id="loadEmployeeData">Load Employees</button>
+
+        <h4 id="username"></h4>
+
+        <button class="btn btn-outline-secondary" id="btnLogout">Logout</button>
+
+    </div>
+
+    <div class="border-top border-bottom bg-body p-2 my-4"></div>
+    <div class="col-md-10 flex-column align-content-center">
+        <div class="p-4 bg-light">
+            <table class="table table-bordered table-light">
+                <thead>
+                    <tr class="table-success">
+                        <td>
+                            Id
+                        </td>
+                        <td>
+                            First Name
+                        </td>
+                        <td>
+                            Last Name
+                        </td>
+                        <td>
+                            Gender
+                        </td>
+                        <td>
+                            Salary
+                        </td>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+            <div id="divError" class="alert alert-danger collapse justify-content-between flex-row">
+                <div id="divErrorText">Somthing Went Wrong</div>
+                <div id="linkClose" class="btn-close" href="#"> &times;</div>
+            </div>
+        </div>
+    </div>
+    <script src="Scripts/jquery-3.4.1.min.js"></script>
+    <script src="Scripts/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            let access_token = sessionStorage.getItem("accessToken");
+            let username = sessionStorage.getItem("userName");
+            if (access_token == null) {
+                window.location.href = 'Login.html';
+            } else {
+                $("#username").text("Hello, " + username);
+            }
+            $("#btnLogout").click(function () {
+                $.ajax({
+                    url: '/api/Account/Logout',
+                    method: 'POST',
+                    headers: {"Authorization" : "Bearer " + access_token},
+                    success: function () {
+                        sessionStorage.removeItem('accessToken');
+                        window.location.replace('Login.html');
+                        access_token = null;
+                    },
+                    error: function (jqXHR) {
+                        $('#divErrorText').text(jqXHR.responseText);
+                        $("#divError").addClass("d-flex").show('fade');
+                    }
+                })
+            })
+            $('#linkClose').click(function () {
+                $("#divError").toggleClass("d-flex").hide('fade');
+            });
+
+            $('#loadEmployeeData').click(function () {
+                $.ajax({
+                    url: '/api/Employees',
+                    method: 'GET',
+                    headers: { "Authorization": "Bearer " + access_token },                    
+                    success: function (res) {
+                        $("#tableBody").empty();
+                        for (var i in res) {
+                            var tableRow = jQuery('<tr>');
+                            var data = res[i];
+                            tableRow.append(`<td> ${data.id}</td>`);
+                            tableRow.append(`<td> ${data.FirstName}</td>`);
+                            tableRow.append(`<td> ${data.LirstName}</td>`);
+                            tableRow.append(`<td> ${data.Gender}</td>`);
+                            tableRow.append(`<td> ${data.Salary}</td>`);
+                            tableRow.appendTo('#tableBody');
+                        }
+                    },
+                    error: function (jqXHR) {
+                        if (jqXHR.statusCode == 401) {
+                            window.location.replace('Login.html');
+                            access_token = null;
+                        }
+                        $('#divErrorText').text(jqXHR.responseText);
+                        $("#divError").addClass("d-flex").show('fade');
+                    }
+                });
+            })
+        });
+    </script>
+</body>
+</html>

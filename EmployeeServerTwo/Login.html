@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="Content/css" rel="stylesheet">
+
+</head>
+<body class="p-5">
+    <div class="col-md-10 flex-column align-content-center">
+        <div class="p-4 bg-light">
+            <table class="table table-bordered table-light">
+                <thead>
+                    <tr class="table-success">
+                        <td colspan="2">
+                            <div class="d-flex justify-content-between fw-semibold align-items-center">
+                                Existing User Login
+                                <a class="btn btn-success" href="Register.html">Register</a>
+                            </div>
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="">Email</td>
+                        <td>
+                            <input type="text" id="textEmail" placeholder="Email" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="">Password</td>
+                        <td>
+                            <input type="text" id="textPassword" placeholder="Password" />
+                        </td>
+                    </tr>
+                  
+                    <tr class="table-success">
+                        <td colspan="2">
+                            <input type="button" id="btnLogin" class="btn btn-success" value="Login" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="modal fade" tabindex="-1" id="successModal" data-keyboard="false" data-backdrop="static">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5>Success</h5>
+                            <button type="button" class="btn-close" data-dismiss="modal">
+                                &times;
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <h3>Registration successfull</h3>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" data-dismiss="modal" class="btn btn-outline-success">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="divError" class="alert alert-danger collapse justify-content-between flex-row">
+                <div id="divErrorText">Somthing Went Wrong</div>
+                <div id="linkClose" class="btn-close" href="#"> &times;</div>
+            </div>
+        </div>
+    </div>
+    <script src="Scripts/jquery-3.4.1.min.js"></script>
+    <script src="Scripts/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#linkClose').click(function () {
+                $("#divError").toggleClass("d-flex").hide('fade');
+            });
+
+            $('#btnLogin').click(function () {
+                $.ajax({
+                    url: '/token',
+                    method: 'POST',
+                    contentType: "application/json",
+                    data: {
+                        UserName: $('#textEmail').val(),
+                        Password: $('#textPassword').val(),
+                        grant_type: 'password',
+
+                    },
+                    success: function (res) {
+                        sessionStorage.setItem('accessToken', res.access_token);
+                        sessionStorage.setItem('userName', res.userName);
+                        window.location.href = "Data.html";
+
+                    },
+                    error: function (jqXHR) {
+                        $('#divErrorText').text(jqXHR.responseText);
+                        $("#divError").addClass("d-flex").show('fade');
+                    }
+                });
+            })
+        });
+    </script>
+</body>
+</html>
